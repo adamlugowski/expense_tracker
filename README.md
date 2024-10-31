@@ -74,18 +74,24 @@ Users can categorize transactions, generate reports, and analyze their spending 
 
    This project uses PostgreSQL as the database with following schema:
    1. **Users Table**:
-      - `user_id` (Primary Key)
-      - `username` (Varchar)
-      - `password` (Varchar)
-      - `email` (Varchar)
-   2. **Transactions Table**:
+      - `user_id` (Serial, Primary Key)
+      - `username` (Varchar Not Null)
+      - `password` (Varchar Not Null)
+      - `email` (Varchar Not Null)
+   2. **Categories Table**:
+      - `category_id` (Serial, Primary Key)
+      - `category_name` (Varchar)
+   3. **Types**:
+      - `type_id` (Serial, Primary Key)
+      - `type_name` (Varchar)
+   4. **Transactions Table**:
       - `transaction_id` (Primary Key)
       - `user_id` (Foreign Key referencing Users Table)
       - `amount` (Decimal)
-      - `category` (Varchar)
+      - `category` (Foreign Key referencing Categories Table
       - `description` (Text)
       - `date` (Date)
-      - `type` (Text)
+      - `type` (Foreign Key referencing Types Table
 ## Contributing
 
 Contributions are welcome! Please fork this repository and submit a pull request for any improvements or bug fixes.
