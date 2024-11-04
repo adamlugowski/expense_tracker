@@ -6,6 +6,38 @@ load_dotenv()
 
 
 class Database:
+    """
+    A class to manage the PostgreSQL database connection and setup for an application.
+
+    This class utilizes environment variables to establish a database connection and
+    provides methods to initialize the database with tables for users, categories, types,
+    and transactions.
+
+    Attributes:
+    ----------
+    db_name : str
+        The name of the database, sourced from environment variables.
+    db_user : str
+        The database user, sourced from environment variables.
+    db_password : str
+        The password for the database user, sourced from environment variables.
+    db_host : str
+        The host address of the database, sourced from environment variables.
+    db_port : str
+        The port number of the database, sourced from environment variables.
+    connection : psycopg2.connection or None
+        The current database connection, initially set to None.
+
+    Methods:
+    -------
+    connect():
+        Establishes a connection to the PostgreSQL database using provided credentials.
+    close():
+        Closes the current database connection if it exists.
+    db_init():
+        Initializes the database tables (users, categories, types, transactions) if they do not exist.
+    """
+
     def __init__(self):
         self.db_name = os.getenv('DB_NAME')
         self.db_user = os.getenv('DB_USER')
