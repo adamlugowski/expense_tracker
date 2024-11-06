@@ -36,6 +36,8 @@ class Database:
         Closes the current database connection if it exists.
     db_init():
         Initializes the database tables (users, categories, types, transactions) if they do not exist.
+    add_user():
+        Inserts a new user to the 'users' table.
     """
 
     def __init__(self):
@@ -57,8 +59,8 @@ class Database:
                     password=self.db_password,
                     host=self.db_host,
                     port=self.db_port)
-        except psycopg2.DatabaseError as e:
-            print(f"A database error occurred: {e}")
+        except psycopg2.DatabaseError as error:
+            print(f'A database error occurred: {error}')
 
     def close(self):
         """
@@ -95,7 +97,32 @@ class Database:
                         date date not null,
                         type integer references types(type_id));''')
             self.connection.commit()
-        except psycopg2.DatabaseError as e:
-            print(f"A database error occurred: {e}")
+        except psycopg2.DatabaseError as error:
+            print(f'A database error occurred: {error}')
+        finally:
+            self.close()
+
+    def add_user(self, username, hashed_password, email):
+        """
+        Inserts a new user into the 'users' table.
+
+        Args:
+        - username (str): The username of the user.
+        - hashed_password (bytes): The hashed password of the user.
+        - email (str): The email address of the user.
+
+        Returns:
+        - bool: True if the insertion was successful, False otherwise.
+        """
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('INSERT INTO users(username, password, email) VALUES (%s, %s, %s);',
+                               (username, hashed_password, email))
+                self.connection.commit()
+                return True
+        except psycopg2.DatabaseError as error:
+            print(f'An error occurred while adding the user: {error}')
+            return False
         finally:
             self.close()
