@@ -38,6 +38,8 @@ class Database:
         Initializes the database tables (users, categories, types, transactions) if they do not exist.
     add_user():
         Inserts a new user to the 'users' table.
+    get_user():
+        Retrieves a user's data from the database based on their username.
     """
 
     def __init__(self):
@@ -80,7 +82,7 @@ class Database:
                 cursor.execute('''create table if not exists users(
                         user_id serial primary key, 
                         username varchar(50) unique not null, 
-                        password varchar(255) not null,
+                        password BYTEA not null,
                         email varchar(100) unique not null);''')
                 cursor.execute('''create table if not exists categories(
                         category_id serial primary key,
@@ -124,5 +126,40 @@ class Database:
         except psycopg2.DatabaseError as error:
             print(f'An error occurred while adding the user: {error}')
             return False
+        finally:
+            self.close()
+
+    def get_user(self, username):
+        """
+        Retrieves a user's data from the database based on their username.
+
+        This method connects to the database, executes a query to find a user
+        by the given username, and returns a dictionary containing the user's
+        username, hashed password, and email if found. If the user does not
+        exist, or if a database error occurs, it returns None.
+
+        Args:
+        - username (str): The username of the user to retrieve.
+
+        Returns:
+        - dict or None: A dictionary with keys 'username', 'password', and 'email'
+          containing the user's data if the user is found, or None if the user
+          does not exist or if a database error occurs.
+
+        Exceptions:
+        - Prints an error message if a psycopg2.DatabaseError is raised during the query.
+        """
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('SELECT username, password, email FROM users WHERE username = %s;', (username,))
+                user = cursor.fetchone()
+                if user:
+                    return {'username': user[0], 'password': user[1], 'email': user[2]}
+                else:
+                    return None
+        except psycopg2.DatabaseError as error:
+            print(f'A database error has occurred while retrieving the user {username}: {error}')
+            return None
         finally:
             self.close()

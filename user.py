@@ -73,3 +73,37 @@ class User:
 
         data = db.add_user(self.username, hashed_password, valid_email)
         return data
+
+    def login(self, db):
+        """
+        Authenticates the user by verifying the provided password with the stored hashed password.
+
+        This method retrieves the user's data from the database, converts the stored hashed password 
+        to bytes, and uses bcrypt to check if the provided password matches the stored hash. If 
+        authentication succeeds, the method returns True; otherwise, it returns False. If there 
+        is an issue accessing the database or retrieving the user data, an error is printed, and 
+        the method returns False.
+
+        Args:
+        - db: A database connection object with a `get_user` method to retrieve user data by username.
+
+        Returns:
+        - bool: True if authentication is successful; False otherwise.
+
+        Exceptions:
+        - Catches any exception during database access or password verification, printing an error 
+          message and returning False.
+        """
+        try:
+            user_data = db.get_user(self.username)
+            hashed_password_from_db = bytes(user_data['password'])
+            if bcrypt.checkpw(self.password.encode('utf-8'), hashed_password_from_db):
+                print("Login successful.")
+                return True
+            else:
+                print("Invalid password.")
+                return False
+        except Exception as error:
+            print(f"Error accessing the database: {error}")
+            return False
+
