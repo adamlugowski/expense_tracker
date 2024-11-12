@@ -37,6 +37,9 @@ Users can register into database and log in to add transactions. Users can categ
 - **Libraries**:
   - `python-dotenv`
   - `psycopg2`
+  - `getpass4`
+  - `bcrypt`
+  - `email-validator`
   
 ## Setup and Installation
 
