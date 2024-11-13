@@ -15,7 +15,8 @@ This project is a Python-based application integrated with PostgreSQL that allow
 ## Introduction
 
 This project is a Python-based application integrated with PostgreSQL that allows users to track their income and expenses. 
-Users can register into database and log in to add transactions. Users can categorize transactions, generate reports, and analyze their spending habits. This project utilizes python-dotenv for managing environment variables.
+Users can register into database and log in to add transactions. Users can categorize transactions, generate reports, and analyze their spending habits. 
+In this project, the `categories` table is seeded with initial categories: Food, Transportation, Utilities, Entertainment, and Health, to set up a basic structure and enable users to start using the application immediately. Users can add two types of entries: Income or Expense (also populated in the `types` table). This project utilizes python-dotenv for managing environment variables.
 
 ## Features
 
@@ -37,6 +38,9 @@ Users can register into database and log in to add transactions. Users can categ
 - **Libraries**:
   - `python-dotenv`
   - `psycopg2`
+  - `getpass4`
+  - `bcrypt`
+  - `email-validator`
   
 ## Setup and Installation
 
@@ -85,7 +89,7 @@ Users can register into database and log in to add transactions. Users can categ
       - `type_id` (Serial, Primary Key)
       - `type_name` (Varchar)
    4. **Transactions Table**:
-      - `transaction_id` (Primary Key)
+      - `transaction_id` (Serial, Primary Key)
       - `user_id` (Foreign Key referencing Users Table)
       - `amount` (Decimal)
       - `category` (Foreign Key referencing Categories Table
