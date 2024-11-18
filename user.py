@@ -76,7 +76,7 @@ class User:
 
     def login(self, db):
         """
-        Authenticates the user by verifying the provided password with the stored hashed password.
+        Authenticates the user by verifying the  provided password with the stored hashed password.
 
         This method retrieves the user's data from the database, converts the stored hashed password 
         to bytes, and uses bcrypt to check if the provided password matches the stored hash. If 
@@ -98,7 +98,6 @@ class User:
             user_data = db.get_user(self.username)
             hashed_password_from_db = bytes(user_data['password'])
             if bcrypt.checkpw(self.password.encode('utf-8'), hashed_password_from_db):
-                print("Login successful.")
                 return True
             else:
                 print("Invalid password.")

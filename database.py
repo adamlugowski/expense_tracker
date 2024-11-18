@@ -156,14 +156,56 @@ class Database:
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute('SELECT username, password, email FROM users WHERE username = %s;', (username,))
+                cursor.execute('SELECT user_id, username, password, email FROM users WHERE username = %s;', (username,))
                 user = cursor.fetchone()
                 if user:
-                    return {'username': user[0], 'password': user[1], 'email': user[2]}
+                    return {'user_id': user[0], 'username': user[1], 'password': user[2], 'email': user[3]}
                 else:
                     return None
         except psycopg2.DatabaseError as error:
             print(f'A database error has occurred while retrieving the user {username}: {error}')
             return None
+        finally:
+            self.close()
+
+    def add_transaction(self, user_id, amount, category, description, date, type_of_transaction):
+        """
+        Add a transaction to the database.
+
+        This method inserts a new transaction record into the `transactions` table with the provided details.
+        It ensures the connection to the database, executes the SQL insert query, and handles errors gracefully.
+
+        Args:
+            user_id (int): The ID of the user associated with the transaction.
+            amount (float): The amount of the transaction (must be a positive value).
+            category (int): The transaction category, represented as an integer.
+            description (str): A brief description of the transaction.
+            date (datetime): The transaction date .
+            type_of_transaction (int): The type of transaction, where 1 represents Income and 2 represents Expense.
+
+        Returns:
+            bool:
+                - `True` if the transaction is successfully added to the database.
+                - `False` if an error occurs during the database operation.
+
+        Exceptions:
+            psycopg2.DatabaseError: Raised if there is an error interacting with the database.
+
+        Notes:
+            - The database connection is established before the operation and closed afterward.
+            - Changes are committed to the database upon successful insertion.
+            - Any database errors are caught, and a message is printed for debugging purposes.
+        """
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('''insert into transactions (user_id, amount, category, description, date, type) 
+                values (%s, %s, %s, %s, %s, %s);''', (user_id, amount, category, description, date, type_of_transaction))
+                self.connection.commit()
+                print('Transaction added successfully. ')
+                return True
+        except psycopg2.DatabaseError as error:
+            print(f'Failed to add transaction to database: {error}')
+            return False
         finally:
             self.close()
