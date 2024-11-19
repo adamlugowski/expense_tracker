@@ -99,7 +99,7 @@ class Database:
                         date date not null,
                         type integer references types(type_id));''')
                 cursor.execute('''insert into categories (category_name) values 
-                ('Food'), ('Transportation'), ('Utilities'), ('Entertainment'), ('Health') on conflict do nothing;''')
+                ('Food'), ('Transportation'), ('Utilities'), ('Entertainment'), ('Health'), ('Account') on conflict do nothing;''')
                 cursor.execute('''insert into types (type_name) values 
                 ('Income'), ('Expense') on conflict do nothing;''')
             self.connection.commit()

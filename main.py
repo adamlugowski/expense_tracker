@@ -41,6 +41,7 @@ def get_category():
         3: Utilities
         4: Entertainment
         5: Health
+        6: Account
 
     Returns:
         int: The number corresponding to the selected category.
@@ -53,7 +54,9 @@ def get_category():
         2: 'Transportation',
         3: 'Utilities',
         4: 'Entertainment',
-        5: 'Health'}
+        5: 'Health',
+        6: 'Account'
+    }
     while True:
         print('Select a category: ')
         for key, value in categories.items():
