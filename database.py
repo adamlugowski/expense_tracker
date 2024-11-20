@@ -209,3 +209,38 @@ class Database:
             return False
         finally:
             self.close()
+
+    def show_transactions(self, user_id):
+        """
+            Retrieve and display all transactions for a specific user in a formatted, user-friendly way.
+
+            This function connects to a PostgreSQL database, queries the `transactions` table for all
+            records associated with the given `user_id`, and prints the results. Each transaction is
+            displayed with details such as transaction ID, user ID, amount, category ID, description,
+            date, and quantity. The output is formatted for better readability.
+
+            Args:
+                user_id (int): The ID of the user whose transactions are to be retrieved.
+        """
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('''select * from transactions where user_id=%s;''', (user_id, ))
+                transactions = cursor.fetchall()
+                for t in transactions:
+                    transaction_details = (
+                        f"Transaction ID: {t[0]}\n"
+                        f"User ID: {t[1]}\n"
+                        f"Amount: ${t[2]:,.2f}\n"
+                        f"Category ID: {t[3]}\n"
+                        f"Description: {t[4]}\n"
+                        f"Date: {t[5].strftime('%Y-%m-%d')}\n"
+                        f"Quantity: {t[6]}"
+                    )
+                    print(transaction_details)
+                    print("-" * 30)
+                self.connection.commit()
+        except psycopg2.DatabaseError as error:
+            print(f'Database error occurred: {error}')
+        finally:
+            self.close()
