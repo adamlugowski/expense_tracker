@@ -172,7 +172,8 @@ def main():
     if user.login(db):
         print("Login successful.")
         user_id = db.get_user(user.username)['user_id']
-        create_transaction(db, user_id)
+        #     create_transaction(db, user_id)
+        db.show_transactions(user_id)
 
 
 if __name__ == '__main__':
