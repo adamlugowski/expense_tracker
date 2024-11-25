@@ -216,8 +216,8 @@ class Database:
 
             This function connects to a PostgreSQL database, queries the `transactions` table for all
             records associated with the given `user_id`, and prints the results. Each transaction is
-            displayed with details such as transaction ID, user ID, amount, category ID, description,
-            date, and quantity. The output is formatted for better readability.
+            displayed with details such as transaction ID, user ID, amount, category name, description,
+            date, and type of transaction. The output is formatted for better readability.
 
             Args:
                 user_id (int): The ID of the user whose transactions are to be retrieved.
@@ -225,17 +225,30 @@ class Database:
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute('''select * from transactions where user_id=%s;''', (user_id, ))
+                cursor.execute('''select 
+                transactions.transaction_id, 
+                transactions.user_id, 
+                transactions.amount, 
+                categories.category_name, 
+                transactions.description, 
+                transactions.date, 
+                types.type_name
+                 from transactions 
+                 left join categories 
+                 on transactions.category = categories.category_id
+                 left join types
+                 on transactions.type = types.type_id
+                 where user_id=%s;''', (user_id, ))
                 transactions = cursor.fetchall()
                 for t in transactions:
                     transaction_details = (
                         f"Transaction ID: {t[0]}\n"
                         f"User ID: {t[1]}\n"
                         f"Amount: ${t[2]:,.2f}\n"
-                        f"Category ID: {t[3]}\n"
+                        f"Category: {t[3]}\n"
                         f"Description: {t[4]}\n"
                         f"Date: {t[5].strftime('%Y-%m-%d')}\n"
-                        f"Quantity: {t[6]}"
+                        f"Type: {t[6]}"
                     )
                     print(transaction_details)
                     print("-" * 30)
