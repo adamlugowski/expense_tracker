@@ -143,6 +143,32 @@ class User:
         """
         db.show_transactions(user_id)
 
+    def delete_transaction(self, user_id, db):
+        """
+        Deletes a specific transaction based on user input.
+
+        This method prompts the user to input a `transaction_id` and checks if the user
+        is eligible to delete the transaction using the `db.check_eligible` method.
+        If the user is eligible, the transaction is deleted using `db.delete_transaction`.
+        If the user is not eligible, a message is displayed. If the input is invalid,
+        an error message is shown prompting for a valid transaction ID.
+
+        Args:
+            user_id (int): The ID of the user attempting to delete the transaction.
+            db (Database): The database object used to check eligibility and delete the transaction.
+
+        Raises:
+            ValueError: If the input `transaction_id` cannot be converted to an integer.
+        """
+        try:
+            transaction_id = int(input('Type the transaction_id to delete the transaction: '))
+            if db.check_eligible(user_id, transaction_id):
+                db.delete_transaction(transaction_id)
+            else:
+                print('You are not eligible to delete this transaction. ')
+        except ValueError:
+            print('Invalid input. Please enter a valid transaction ID.')
+
     @staticmethod
     def get_amount():
         """
@@ -269,4 +295,3 @@ class User:
                 print('Invalid choice. Please select 1 or 2.')
             except ValueError:
                 print('You should type a number (1 or 2). ')
-
