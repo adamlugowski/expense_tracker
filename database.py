@@ -79,29 +79,30 @@ class Database:
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute('''create table if not exists users(
-                        user_id serial primary key, 
-                        username varchar(50) unique not null, 
-                        password BYTEA not null,
-                        email varchar(100) unique not null);''')
-                cursor.execute('''create table if not exists categories(
-                        category_id serial primary key,
-                        category_name varchar(255));''')
-                cursor.execute('''create table if not exists types(
-                        type_id serial primary key,
-                        type_name varchar(10));''')
-                cursor.execute('''create table if not exists transactions(
-                        transaction_id serial primary key,
-                        user_id integer references users(user_id),
-                        amount decimal,
-                        category integer references categories(category_id),
-                        description text,
-                        date date not null,
-                        type integer references types(type_id));''')
-                cursor.execute('''insert into categories (category_name) values 
-                ('Food'), ('Transportation'), ('Utilities'), ('Entertainment'), ('Health'), ('Account') on conflict do nothing;''')
-                cursor.execute('''insert into types (type_name) values 
-                ('Income'), ('Expense') on conflict do nothing;''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS users(
+                        user_id serial PRIMARY KEY, 
+                        username VARCHAR(50) UNIQUE NOT NULL, 
+                        password BYTEA NOT NULL,
+                        email VARCHAR(100) UNIQUE NOT NULL);''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS categories(
+                        category_id serial PRIMARY KEY,
+                        category_name VARCHAR(255));''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS types(
+                        type_id serial PRIMARY KEY,
+                        type_name VARCHAR(10));''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS transactions(
+                        transaction_id serial PRIMARY KEY,
+                        user_id INTEGER REFERENCES users(user_id),
+                        amount DECIMAL,
+                        category INTEGER REFERENCES categories(category_id),
+                        description TEXT,
+                        date DATE NOT NULL,
+                        type INTEGER REFERENCES types(type_id));''')
+                cursor.execute('''INSERT INTO categories (category_name) VALUES 
+                ('Food'), ('Transportation'), ('Utilities'), ('Entertainment'), ('Health'), ('Account') 
+                ON CONFLICT DO NOTHING;''')
+                cursor.execute('''INSERT INTO types (type_name) VALUES 
+                ('Income'), ('Expense') ON CONFLICT DO NOTHING;''')
             self.connection.commit()
         except psycopg2.DatabaseError as error:
             print(f'A database error occurred: {error}')
@@ -199,8 +200,9 @@ class Database:
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute('''insert into transactions (user_id, amount, category, description, date, type) 
-                values (%s, %s, %s, %s, %s, %s);''', (user_id, amount, category, description, date, type_of_transaction))
+                cursor.execute('''INSERT INTO 
+                transactions (user_id, amount, category, description, date, type) 
+                VALUES (%s, %s, %s, %s, %s, %s);''', (user_id, amount, category, description, date, type_of_transaction))
                 self.connection.commit()
                 print('Transaction added successfully. ')
                 return True
@@ -212,20 +214,20 @@ class Database:
 
     def show_transactions(self, user_id):
         """
-            Retrieve and display all transactions for a specific user in a formatted, user-friendly way.
+        Retrieve and display all transactions for a specific user in a formatted, user-friendly way.
 
-            This function connects to a PostgreSQL database, queries the `transactions` table for all
-            records associated with the given `user_id`, and prints the results. Each transaction is
-            displayed with details such as transaction ID, user ID, amount, category name, description,
-            date, and type of transaction. The output is formatted for better readability.
+        This function connects to a PostgreSQL database, queries the `transactions` table for all
+        records associated with the given `user_id`, and prints the results. Each transaction is
+        displayed with details such as transaction ID, user ID, amount, category name, description,
+        date, and type of transaction. The output is formatted for better readability.
 
-            Args:
-                user_id (int): The ID of the user whose transactions are to be retrieved.
+        Args:
+            user_id (int): The ID of the user whose transactions are to be retrieved.
         """
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute('''select 
+                cursor.execute('''SELECT 
                 transactions.transaction_id, 
                 transactions.user_id, 
                 transactions.amount, 
@@ -233,18 +235,18 @@ class Database:
                 transactions.description, 
                 transactions.date, 
                 types.type_name
-                 from transactions 
-                 left join categories 
-                 on transactions.category = categories.category_id
-                 left join types
-                 on transactions.type = types.type_id
-                 where user_id=%s;''', (user_id, ))
+                 FROM transactions 
+                 LEFT JOIN categories 
+                 ON transactions.category = categories.category_id
+                 LEFT JOIN types
+                 ON transactions.type = types.type_id
+                 WHERE user_id=%s;''', (user_id, ))
                 transactions = cursor.fetchall()
                 for t in transactions:
                     transaction_details = (
                         f"Transaction ID: {t[0]}\n"
                         f"User ID: {t[1]}\n"
-                        f"Amount: ${t[2]:,.2f}\n"
+                        f"Amount: PLN{t[2]:,.2f}\n"
                         f"Category: {t[3]}\n"
                         f"Description: {t[4]}\n"
                         f"Date: {t[5].strftime('%Y-%m-%d')}\n"
@@ -252,8 +254,65 @@ class Database:
                     )
                     print(transaction_details)
                     print("-" * 30)
-                self.connection.commit()
         except psycopg2.DatabaseError as error:
             print(f'Database error occurred: {error}')
         finally:
             self.close()
+
+    def delete_transaction(self, transaction_id):
+        """
+        Deletes a transaction from the database.
+
+        This method removes a transaction record from the `transactions` table based
+        on the specified `transaction_id`. It establishes a connection to the database,
+        executes the deletion query, and commits the changes.
+
+        Args:
+        transaction_id (int): The ID of the transaction to be deleted.
+        """
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('DELETE FROM transactions WHERE transaction_id=%s;', (transaction_id, ))
+                print('Transaction deleted successfully. ')
+                self.connection.commit()
+        except psycopg2.DatabaseError as error:
+            print('Error during deleting the transaction. ')
+        finally:
+            self.close()
+
+    def check_eligible(self, user_id, transaction_id):
+        """
+        Checks if a user is eligible to modify or delete a specific transaction.
+
+        This method verifies whether a given `user_id` is associated with a transaction
+        identified by `transaction_id`. It connects to the database, retrieves the `user_id`
+        associated with the transaction, and checks if it matches the provided `user_id`.
+
+        Args:
+            user_id (int): The ID of the user attempting to access the transaction.
+            transaction_id (int): The ID of the transaction to verify.
+
+        Returns:
+            bool:
+            - `True` if the `user_id` is associated with the given `transaction_id`.
+            - `False` if no matching transaction is found or if the `user_id` does not match.
+
+        """
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('SELECT user_id FROM transactions WHERE transaction_id = %s;', (transaction_id,))
+                result = cursor.fetchone()
+                if result is None:
+                    print(f'No transaction found with ID {transaction_id}. ')
+                    return False
+                if user_id == result[0]:
+                    return True
+                else:
+                    return False
+        except psycopg2.DatabaseError as error:
+            print(f'{error}')
+        finally:
+            self.close()
+

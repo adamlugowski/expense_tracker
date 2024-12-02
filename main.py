@@ -15,7 +15,7 @@ def main():
         print("Login successful.")
         user_id = db.get_user(user.username)['user_id']
         while True:
-            print("[1] View Transactions\n[2] Add Transaction\n[3] Exit")
+            print('[1] View Transactions\n[2] Add Transaction\n[3] Delete Transaction\n[4] Exit')
             try:
                 choice = int(input("Choose an option: "))
 
@@ -24,6 +24,8 @@ def main():
                 elif choice == 2:
                     user.create_transaction(user_id, db)
                 elif choice == 3:
+                    user.delete_transaction(user_id, db)
+                elif choice == 4:
                     print("Goodbye!")
                     break
                 else:
