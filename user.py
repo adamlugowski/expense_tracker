@@ -169,6 +169,53 @@ class User:
         except ValueError:
             print('Invalid input. Please enter a valid transaction ID.')
 
+    def update_transaction(self, user_id, db):
+        """
+        Update a transaction's details for a given user.
+
+        This method allows a user to update either the amount or the description of
+        a specific transaction if the transaction is eligible. The user is prompted
+        to choose the transaction to update and the field (amount or description) to modify.
+
+        Parameters:
+            user_id (int): The ID of the user requesting the update.
+            db (object): A database handler object that provides methods to interact
+                         with the database, such as checking eligibility and updating transactions.
+
+        Prompts:
+            - Transaction ID to specify which transaction to update.
+            - Choice between updating the amount or description.
+
+        Behavior:
+            - If the user chooses to update the amount, they will be prompted to input the new amount.
+            - If the user chooses to update the description, they will be prompted to input the new description.
+            - Updates are committed to the database if the transaction is eligible and valid inputs are provided.
+
+        Exceptions:
+            - Prompts the user again if invalid inputs are provided for the transaction ID or choice.
+        """
+
+        transaction_id = int(input('Type the transaction_id to update the transaction. '))
+        if db.check_if_eligible(user_id, transaction_id):
+            print('What information would you like to update? ')
+            print('[1] Amount [2] Description. ')
+            while True:
+                try:
+                    user_choice = int(input('Type 1 or 2: '))
+                    if user_choice not in [1, 2]:
+                        raise ValueError
+                except ValueError:
+                    print('Invalid choice. Please choose [1] Amount or [2] Description.')
+                    continue
+                if user_choice == 1:
+                    amount = self.get_amount()
+                    db.update_amount_of_transaction(amount, transaction_id)
+                    break
+                elif user_choice == 2:
+                    description = self.get_description()
+                    db.update_description_of_transaction(description, transaction_id)
+                    break
+
     @staticmethod
     def get_amount():
         """

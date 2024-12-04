@@ -277,11 +277,62 @@ class Database:
                 print('Transaction deleted successfully. ')
                 self.connection.commit()
         except psycopg2.DatabaseError as error:
-            print('Error during deleting the transaction. ')
+            print(f'Error during deleting the transaction: {error}')
         finally:
             self.close()
 
-    def check_eligible(self, user_id, transaction_id):
+    def update_amount_of_transaction(self, amount, transaction_id):
+        """
+        Update the amount of a specific transaction in the database.
+
+        This method connects to the database and updates the `amount` field of a
+        transaction identified by its `transaction_id`. It commits the changes and
+        provides feedback on the success or failure of the operation.
+
+        Parameters:
+            amount (float): The new amount to update in the transaction.
+            transaction_id (int): The ID of the transaction to be updated.
+        """
+
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('UPDATE transactions set amount=%s WHERE transaction_id=%s', (amount, transaction_id))
+                print(f'New amount: {amount}. ')
+                print(f'Amount updated successfully in transaction {transaction_id}. ')
+                self.connection.commit()
+        except psycopg2.DatabaseError as error:
+            print(f'Error during updating the transaction: {error}')
+        finally:
+            self.close()
+
+    def update_description_of_transaction(self, description, transaction_id):
+        """
+        Update the description of a specific transaction in the database.
+
+        This method connects to the database and updates the `description` field
+        of a transaction identified by its `transaction_id`. It commits the changes
+        and provides feedback on the success or failure of the operation.
+
+        Parameters:
+            description (str): The new description to update in the transaction.
+            transaction_id (int): The ID of the transaction to be updated.
+        """
+
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('UPDATE transactions set description=%s WHERE transaction_id=%s',
+                               (description, transaction_id))
+                print(f'New description: {description}. ')
+                print(f'Description updated successfully in transaction {transaction_id}. ')
+                self.connection.commit()
+        except psycopg2.DatabaseError as error:
+            print(f'Error during updating the transaction: {error}')
+        finally:
+            self.close()
+
+    def check_if_eligible(self, user_id, transaction_id):
         """
         Checks if a user is eligible to modify or delete a specific transaction.
 
