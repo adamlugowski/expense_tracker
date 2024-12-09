@@ -98,6 +98,9 @@ class User:
         """
         try:
             user_data = db.get_user(self.username)
+            if not user_data:
+                print("Username not found.")
+                return False
             hashed_password_from_db = bytes(user_data['password'])
             if bcrypt.checkpw(self.password.encode('utf-8'), hashed_password_from_db):
                 return True
@@ -139,9 +142,46 @@ class User:
 
     def show_transactions(self, user_id, db):
         """
-        Display all transactions associated with this user.
+        Displays the user's transactions based on the selected option.
+
+        This method allows the user to view all transactions, total income, or total expenses
+        associated with their account. The user is prompted to select an option, and the
+        corresponding data is retrieved and displayed from the database.
+
+        Args:
+            user_id (int): The ID of the user whose transactions are being viewed.
+            db (object): The database object providing methods to fetch transaction data.
+
+        Prompts:
+            - [1] All transactions
+            - [2] Total income
+            - [3] Total expenses
+
+        Behavior:
+            - If the user selects option 1, all transactions for the user are displayed.
+            - If the user selects option 2, the total income for the user is displayed.
+            - If the user selects option 3, the total expenses for the user are displayed.
+            - If an invalid option is chosen, the user is prompted to select again.
+
+        Exceptions:
+            - Catches ValueError if the user enters a non-integer value, displaying an error message.
         """
-        db.show_transactions(user_id)
+
+        try:
+            while True:
+                user = int(input('Choose your option: '
+                                 '[1] All transactions [2] Total income [3] Total expenses: '))
+                if user == 1:
+                    db.show_all_transactions(user_id)
+                elif user == 2:
+                    db.show_total_income(user_id)
+                elif user == 3:
+                    db.show_total_expenses(user_id)
+                else:
+                    print('You should choose one of printed options. ')
+                    continue
+        except ValueError as error:
+            print(f'You should type an integer: {error} ')
 
     def delete_transaction(self, user_id, db):
         """
@@ -312,10 +352,13 @@ class User:
         """
         while True:
             try:
+                print("Enter a date or leave it blank to use today's date. ")
                 transaction_date = input('Enter date (YYYY-MM-DD: ')
+                if not transaction_date:
+                    return datetime.now()
                 return datetime.strptime(transaction_date, '%Y-%m-%d')
             except ValueError:
-                print('Invalid date format. Please use YYYY-MM-DD. Try again:')
+                print('Invalid date format. Please use YYYY-MM-DD. Try again. ')
 
     @staticmethod
     def get_transaction_type():
