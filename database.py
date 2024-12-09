@@ -212,7 +212,7 @@ class Database:
         finally:
             self.close()
 
-    def show_transactions(self, user_id):
+    def show_all_transactions(self, user_id):
         """
         Retrieve and display all transactions for a specific user in a formatted, user-friendly way.
 
@@ -254,6 +254,76 @@ class Database:
                     )
                     print(transaction_details)
                     print("-" * 30)
+        except psycopg2.DatabaseError as error:
+            print(f'Database error occurred: {error}')
+        finally:
+            self.close()
+
+    def show_total_income(self, user_id):
+        """
+        Calculates and displays the total income for a specific user.
+
+        This method connects to the database, retrieves the sum of all transaction amounts
+        categorized as income (type = 1) for the specified user, and prints the total income.
+
+        Args:
+            user_id (int): The ID of the user whose total income is being calculated.
+
+        Returns:
+            float: The total income amount if the query is successful; None otherwise.
+
+        Behavior:
+            - Connects to the database.
+            - Executes a query to calculate the total income for the user.
+            - Prints the total income to the console.
+            - Ensures the database connection is closed after the operation.
+
+        Exceptions:
+            - Handles psycopg2.DatabaseError, printing an error message if a database error occurs.
+        """
+
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('select sum(amount) from transactions where user_id = %s and type = 1;', (user_id,))
+                result = cursor.fetchone()
+                print(f'Your total income: {result[0]}')
+                return result[0]
+        except psycopg2.DatabaseError as error:
+            print(f'Database error occurred: {error}')
+        finally:
+            self.close()
+
+    def show_total_expenses(self, user_id):
+        """
+        Calculates and displays the total expenses for a specific user.
+
+        This method connects to the database, retrieves the sum of all transaction amounts
+        categorized as expenses (type = 2) for the specified user, and prints the total expenses.
+
+        Args:
+            user_id (int): The ID of the user whose total expenses are being calculated.
+
+        Returns:
+            float: The total expense amount if the query is successful; None otherwise.
+
+        Behavior:
+            - Connects to the database.
+            - Executes a query to calculate the total expenses for the user.
+            - Prints the total expenses to the console.
+            - Ensures the database connection is closed after the operation.
+
+        Exceptions:
+            - Handles psycopg2.DatabaseError, printing an error message if a database error occurs.
+        """
+
+        self.connect()
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute('select sum(amount) from transactions where user_id = %s and type = 2;', (user_id, ))
+                result = cursor.fetchone()
+                print(f'Your total expenses: {result[0]}')
+                return result[0]
         except psycopg2.DatabaseError as error:
             print(f'Database error occurred: {error}')
         finally:
