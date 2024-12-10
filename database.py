@@ -329,6 +329,16 @@ class Database:
         finally:
             self.close()
 
+    def show_balance(self, user_id):
+        try:
+            total_income = self.show_total_income(user_id)
+            total_expenses = self.show_total_expenses(user_id)
+            balance = total_income - total_expenses
+            print(f'Your balance is: {balance}')
+            return balance
+        except psycopg2.DatabaseError as error:
+            print(f'Error occurred: {error}')
+
     def delete_transaction(self, transaction_id):
         """
         Deletes a transaction from the database.

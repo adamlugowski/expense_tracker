@@ -170,15 +170,17 @@ class User:
         try:
             while True:
                 user = int(input('Choose your option: '
-                                 '[1] All transactions [2] Total income [3] Total expenses: '))
+                                 '[1] All transactions [2] Total income [3] Total expenses [4] Show balance: '))
                 if user == 1:
                     db.show_all_transactions(user_id)
                 elif user == 2:
                     db.show_total_income(user_id)
                 elif user == 3:
                     db.show_total_expenses(user_id)
+                elif user == 4:
+                    db.show_balance(user_id)
                 else:
-                    print('You should choose one of printed options. ')
+                    print('You should choose one of displayed options. ')
                     continue
         except ValueError as error:
             print(f'You should type an integer: {error} ')
