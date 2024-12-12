@@ -144,7 +144,7 @@ class User:
         """
         Displays the user's transactions based on the selected option.
 
-        This method allows the user to view all transactions, total income, or total expenses
+        This method allows the user to view all transactions, total income, total expenses or balance
         associated with their account. The user is prompted to select an option, and the
         corresponding data is retrieved and displayed from the database.
 
@@ -156,11 +156,13 @@ class User:
             - [1] All transactions
             - [2] Total income
             - [3] Total expenses
+            - [4] Balance
 
         Behavior:
             - If the user selects option 1, all transactions for the user are displayed.
             - If the user selects option 2, the total income for the user is displayed.
             - If the user selects option 3, the total expenses for the user are displayed.
+            - If the user selects option 4, the balance for the user are displayed.
             - If an invalid option is chosen, the user is prompted to select again.
 
         Exceptions:

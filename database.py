@@ -330,6 +330,25 @@ class Database:
             self.close()
 
     def show_balance(self, user_id):
+        """
+        Calculate and display the balance for a given user.
+
+        The balance is calculated as the difference between the total income and total expenses
+        of the user identified by the provided `user_id`. If any database-related error occurs,
+        it is caught and logged.
+
+        Args:
+            user_id (int): The unique identifier of the user whose balance is to be calculated.
+
+        Returns:
+            float: The calculated balance (total income - total expenses).
+
+        Raises:
+            psycopg2.DatabaseError: If an error occurs during database operations.
+
+        Side Effects:
+            Prints the calculated balance or an error message to the console.
+        """
         try:
             total_income = self.show_total_income(user_id)
             total_expenses = self.show_total_expenses(user_id)
