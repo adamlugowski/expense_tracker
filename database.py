@@ -465,4 +465,3 @@ class Database:
             print(f'{error}')
         finally:
             self.close()
-
