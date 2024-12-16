@@ -11,7 +11,7 @@ def main():
     email = input('Enter your email: ')
     user = User(username, password, email)
     # user.register(db)
-    if user.login(db):
+    if user.login(db, email):
         print("Login successful.")
         user_id = db.get_user(user.username)['user_id']
         while True:

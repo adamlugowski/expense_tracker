@@ -76,36 +76,32 @@ class User:
         data = db.add_user(self.username, hashed_password, valid_email)
         return data
 
-    def login(self, db):
+    def login(self, db, email):
         """
-        Authenticates the user by verifying the  provided password with the stored hashed password.
+        Authenticate a user based on their username, password, and email.
 
-        This method retrieves the user's data from the database, converts the stored hashed password 
-        to bytes, and uses bcrypt to check if the provided password matches the stored hash. If 
-        authentication succeeds, the method returns True; otherwise, it returns False. If there 
-        is an issue accessing the database or retrieving the user data, an error is printed, and 
-        the method returns False.
+        This method verifies the user's credentials by checking the provided username,
+        password, and email against stored data in the database. It uses bcrypt for
+        secure password comparison.
 
         Args:
-        - db: A database connection object with a `get_user` method to retrieve user data by username.
-
-        Returns:
-        - bool: True if authentication is successful; False otherwise.
-
-        Exceptions:
-        - Catches any exception during database access or password verification, printing an error 
-          message and returning False.
+            db (Database): The database instance to fetch user data.
+            email (str): The email provided by the user for authentication.
         """
         try:
             user_data = db.get_user(self.username)
             if not user_data:
-                print("Username not found.")
+                print("Username not found. ")
                 return False
             hashed_password_from_db = bytes(user_data['password'])
             if bcrypt.checkpw(self.password.encode('utf-8'), hashed_password_from_db):
-                return True
+                if email == user_data['email']:
+                    return True
+                else:
+                    print('Invalid email. ')
+                    return False
             else:
-                print("Invalid password.")
+                print("Invalid password. ")
                 return False
         except Exception as error:
             print(f"Error accessing the database: {error}")
@@ -172,7 +168,10 @@ class User:
         try:
             while True:
                 user = int(input('Choose your option: '
-                                 '[1] All transactions [2] Total income [3] Total expenses [4] Show balance: '))
+                                 '[1] All transactions '
+                                 '[2] Total income '
+                                 '[3] Total expenses '
+                                 '[4] Show balance'))
                 if user == 1:
                     db.show_all_transactions(user_id)
                 elif user == 2:
@@ -206,7 +205,7 @@ class User:
         """
         try:
             transaction_id = int(input('Type the transaction_id to delete the transaction: '))
-            if db.check_eligible(user_id, transaction_id):
+            if db.check_if_eligible(user_id, transaction_id):
                 db.delete_transaction(transaction_id)
             else:
                 print('You are not eligible to delete this transaction. ')
