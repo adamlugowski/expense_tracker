@@ -210,25 +210,29 @@ class Database:
         finally:
             self.close()
 
-    def fetch_data(self, query, user_id):
+    def fetch_data(self, query, params):
         """
-        Executes a database query to fetch data for a specific user.
+        Executes a database query with the provided parameters and returns the fetched results.
 
-        This method establishes a connection to the database, executes the provided query with the given
-        user ID as a parameter, and returns the fetched results. It ensures proper resource management
+        This method establishes a connection to the database, executes the provided SQL query using the
+        specified parameters, and retrieves the resulting data. It ensures proper resource management
         by closing the database connection after the query is executed, regardless of success or failure.
 
         Args:
-            query (str): The SQL query to execute. It should include a parameter placeholder (e.g., %s).
-            user_id (int or str): The user ID to filter the query results.
+            query (str): The SQL query to be executed. It should include parameter placeholders (e.g., %s).
+            params (tuple): A tuple of parameters to be passed into the query, matching the placeholders.
 
         Returns:
-            list: A list of records fetched from the database. Returns an empty list if an error occurs.
+            list: A list of records fetched from the database. Returns an empty list if an error occurs during execution.
+
+        Raises:
+            psycopg2.DatabaseError: If there is an error during the query execution.
         """
+
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute(query, (user_id, ))
+                cursor.execute(query, params)
                 return cursor.fetchall()
         except psycopg2.DatabaseError as error:
             print(f'Database error occurred: {error}')
