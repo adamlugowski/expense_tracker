@@ -29,7 +29,7 @@ Fetching data is supported by `pandas` library for better readability and analyt
   
 - **Reports:**
   - View total income, total expenses, and balance.
-  - Generate categorized reports based on user-defined time periods (e.g., monthly, yearly).
+  - Generate categorized reports based on user-defined time periods.
 
 ## Technologies used
 

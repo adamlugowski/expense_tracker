@@ -44,7 +44,8 @@ class FinancialReport:
                     ON transactions.type = types.type_id
                     WHERE user_id=%s;'''
         try:
-            return self.db.fetch_data(query, (user_id,))
+            params = [user_id]
+            return self.db.fetch_data(query, tuple(params))
         except Exception as error:
             print(f'Error fetching transactions: {error}')
             return None
@@ -100,7 +101,8 @@ class FinancialReport:
                 LEFT JOIN types ON transactions.type = types.type_id
                 WHERE transactions.user_id = %s AND types.type_name = 'Income';'''
         try:
-            return self.db.fetch_data(query, user_id)
+            params = [user_id]
+            return self.db.fetch_data(query, tuple(params))
         except Exception as error:
             print(f'Error fetching result: {error}')
             return None
@@ -154,7 +156,8 @@ class FinancialReport:
                 WHERE transactions.user_id = %s AND types.type_name = 'Expense';'''
 
         try:
-            return self.db.fetch_data(query, user_id)
+            params = [user_id]
+            return self.db.fetch_data(query, tuple(params))
         except Exception as error:
             print(f'Error fetching result: {error}')
             return None
@@ -257,3 +260,76 @@ class FinancialReport:
         print(balance_df)
         return balance_df
 
+    def fetch_date_to_date_data(self, user_id, start_date, end_date):
+        """
+        Fetches transaction data for a specific user within a specified date range.
+
+        This method constructs a SQL query to fetch transaction details, including transaction ID, user ID,
+        amount, category, description, date, and type, for a user within a given date range (start date to
+        end date). The results are returned as a list of records fetched from the database.
+
+        Args:
+            user_id (int or str): The user ID to filter the transaction data.
+            start_date (str): The start date for the date range in 'YYYY-MM-DD' format.
+            end_date (str): The end date for the date range in 'YYYY-MM-DD' format.
+
+        Returns:
+            list: A list of transaction records fetched from the database. Each record contains transaction
+                  details (transaction_id, user_id, amount, category_name, description, date, type_name).
+                  Returns None if an error occurs while fetching the data.
+        """
+
+        query = '''SELECT 
+                    transactions.transaction_id, 
+                    transactions.user_id, 
+                    transactions.amount, 
+                    categories.category_name, 
+                    transactions.description, 
+                    transactions.date, 
+                    types.type_name
+                    FROM transactions 
+                    LEFT JOIN categories 
+                    ON transactions.category = categories.category_id
+                    LEFT JOIN types
+                    ON transactions.type = types.type_id
+                    WHERE user_id=%s AND transactions.date BETWEEN %s AND %s;'''
+
+        try:
+            params = [user_id, start_date, end_date]
+            return self.db.fetch_data(query, tuple(params))
+        except Exception as error:
+            print(f'Error fetching transactions: {error}')
+            return None
+
+    def generate_date_to_date_report(self, user_id, start_date, end_date):
+        """
+        Generates a report of transactions for a specific user within a specified date range.
+
+        This method retrieves transaction data for a user from the database between the provided
+        start and end dates, and then formats it into a Pandas DataFrame. The report includes details
+        such as transaction ID, user ID, amount, category, description, date, and transaction type.
+        If no transactions are found for the specified date range, an empty DataFrame is returned.
+
+        Args:
+            user_id (int or str): The user ID whose transactions are to be retrieved.
+            start_date (str): The start date for the date range in 'YYYY-MM-DD' format.
+            end_date (str): The end date for the date range in 'YYYY-MM-DD' format.
+
+        Returns:
+            pd.DataFrame: A Pandas DataFrame containing the transaction details. If no transactions
+                          are found, an empty DataFrame is returned.
+        """
+
+        transactions = self.fetch_date_to_date_data(user_id, start_date, end_date)
+        if transactions:
+            columns = [
+                "Transaction ID", "User ID", "Amount (PLN)",
+                "Category", "Description", "Date", "Type"
+            ]
+            df = pd.DataFrame(transactions, columns=columns)
+            print(f'This is user {user_id} transactions. ')
+            print(df)
+            return df
+        else:
+            print('No transactions found. ')
+            return pd.DataFrame()

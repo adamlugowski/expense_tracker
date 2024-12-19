@@ -141,8 +141,8 @@ class User:
         """
         Displays the user's transactions based on the selected option.
 
-        This method allows the user to view all transactions, total income, total expenses or balance
-        associated with their account. The user is prompted to select an option, and the
+        This method allows the user to view all transactions, total income, total expenses, balance or report on
+        specified dates associated with their account. The user is prompted to select an option, and the
         corresponding data is retrieved and displayed from the database.
 
         Args:
@@ -154,14 +154,16 @@ class User:
             - [2] Total income
             - [3] Total expenses
             - [4] Balance
-            - [5] Exit
+            - [5] Specified dates
+            - [0] Exit
 
         Behavior:
             - If the user selects option 1, all transactions for the user are displayed.
             - If the user selects option 2, the total income for the user is displayed.
             - If the user selects option 3, the total expenses for the user are displayed.
-            - If the user selects option 4, the balance for the user are displayed.
-            - If the user selects option 5 - exiting to main().
+            - If the user selects option 4, the balance for the user is displayed.
+            - If the user selects option 5, the report on specified dates is displayed.
+            - If the user selects option 0 - exiting to main().
             - If an invalid option is chosen, the user is prompted to select again.
 
         Exceptions:
@@ -171,7 +173,13 @@ class User:
         try:
             report = FinancialReport(db)
             while True:
-                user = int(input('Choose your option: [1] All transactions [2] Total income [3] Total expenses [4] Show balance [0] Exit '))
+                user = int(input('Choose your option: '
+                                 '[1] All transactions '
+                                 '[2] Total income '
+                                 '[3] Total expenses '
+                                 '[4] Show balance '
+                                 '[5] Specified dates '
+                                 '[0] Exit '))
                 if user == 0:
                     print('Exiting. ')
                     break
@@ -183,6 +191,15 @@ class User:
                     report.generate_total_expenses_report(user_id)
                 elif user == 4:
                     report.generate_balance_report(user_id)
+                elif user == 5:
+                    while True:
+                        start_date = self.is_valid_date(input('Enter start date (YYYY-MM-DD): '))
+                        end_date = self.is_valid_date(input('Enter end date (YYYY-MM-DD): '))
+                        if start_date and end_date:
+                            report.generate_date_to_date_report(user_id, start_date, end_date)
+                            break
+                        else:
+                            print("Invalid date format. Please use YYYY-MM-DD.")
                 else:
                     print('You should choose one of displayed options. ')
                     continue
@@ -391,3 +408,20 @@ class User:
                 print('Invalid choice. Please select 1 or 2.')
             except ValueError:
                 print('You should type a number (1 or 2). ')
+
+    @staticmethod
+    def is_valid_date(date_str):
+        """
+        Checks if the input date string is in the correct 'YYYY-MM-DD' format.
+
+        Args:
+            date_str (str): The date string to be checked.
+
+        Returns:
+            bool: True if the date is in the 'YYYY-MM-DD' format, False otherwise.
+        """
+        try:
+            valid_date = datetime.strptime(date_str, '%Y-%m-%d')
+            return valid_date
+        except ValueError:
+            return None
