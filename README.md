@@ -1,6 +1,6 @@
 # Expense Tracker Application
 
-This project is a Python-based application integrated with PostgreSQL that allows users to track their income and expenses.
+This project is a Python-based application integrated with PostgreSQL that enables users to track their income and expenses using the Pandas library.
 
 ## Table of contents
 
@@ -14,9 +14,9 @@ This project is a Python-based application integrated with PostgreSQL that allow
 
 ## Introduction
 
-This project is a Python-based application integrated with PostgreSQL that allows users to track their income and expenses. 
-Users can register into database and log in to add transactions. Users can categorize transactions, generate reports, and analyze their spending habits. 
-In this project, the `categories` table is seeded with initial categories: Food, Transportation, Utilities, Entertainment, Health and Account to set up a basic structure and enable users to start using the application immediately. Users can add two types of entries: Income or Expense (also populated in the `types` table). This project utilizes python-dotenv for managing environment variables.
+This project is a Python-based application integrated with PostgreSQL database that allows users to track their income and expenses. 
+Users can register into database and log in to add transactions. Users can categorize transactions, generate reports to analyze their spending habits. 
+Fetching data is supported by `pandas` library for better readability and analytics. In this project, the `categories` table is seeded with initial categories: Food, Transportation, Utilities, Entertainment, Health and Account to set up a basic structure and enable users to start using the application immediately. Users can add two types of entries: Income or Expense (also populated in the `types` table). This project utilizes python-dotenv for managing environment variables.
 
 ## Features
 
@@ -41,6 +41,7 @@ In this project, the `categories` table is seeded with initial categories: Food,
   - `getpass4`
   - `bcrypt`
   - `email-validator`
+  - `pandas`
   
 ## Setup and Installation
 
@@ -64,10 +65,42 @@ In this project, the `categories` table is seeded with initial categories: Food,
     ```bash
     pip install -r requirements.txt
     ```
+4. **Set up a PostgreSQL database**:
 
-4. **Initialize the database**:
-    - Create database and tables using the provided schema (see [Database_Schema](#database-schema) section)
+    - Make sure you have PostgreSQL installed on your system. If not, you can download it from [https://www.postgresql.org/download/](https://www.postgresql.org/download/).
+    - Create a new database:
+      1. Open the PostgreSQL shell or a database client (e.g., pgAdmin).
+      2. Create a database for the application:
+         ```sql
+         CREATE DATABASE expense_tracker;
+         ```
+      3. (Optional) Create a dedicated user for this database and grant privileges:
+         ```sql
+         CREATE USER app_user WITH PASSWORD 'yourpassword';
+         GRANT ALL PRIVILEGES ON DATABASE expense_tracker TO app_user;
+         ```
 
+5. **Configure environment variables**:
+    - Create a `.env` file in the project root directory and add your database credentials. For example:
+      ```
+      DB_NAME=expense_tracker
+      DB_USER=app_user
+      DB_PASSWORD=yourpassword
+      DB_HOST=localhost
+      DB_PORT=5432
+      ```
+    - Replace the placeholders with your actual database details.
+
+6. **Initialize the database**:
+    - Run the script to set up the necessary tables and seed data:
+      ```bash
+      python -c "from app import Database; db = Database(); db.db_init()"
+      ```
+
+7. **Run the application**:
+    ```bash
+    python app.py
+    ```
 ## Usage
 
 1. **Run the script**:
@@ -92,7 +125,7 @@ In this project, the `categories` table is seeded with initial categories: Food,
       - `transaction_id` (Serial, Primary Key)
       - `user_id` (Foreign Key referencing Users Table)
       - `amount` (Decimal)
-      - `category` (Foreign Key referencing Categories Table
+      - `category` (Foreign Key referencing Categories Table)
       - `description` (Text)
       - `date` (Date)
       - `type` (Foreign Key referencing Types Table

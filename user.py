@@ -2,6 +2,7 @@ import bcrypt
 from email_validator import validate_email, EmailNotValidError
 from database import Database
 from datetime import datetime
+from financial_report import FinancialReport
 
 
 class User:
@@ -153,12 +154,14 @@ class User:
             - [2] Total income
             - [3] Total expenses
             - [4] Balance
+            - [5] Exit
 
         Behavior:
             - If the user selects option 1, all transactions for the user are displayed.
             - If the user selects option 2, the total income for the user is displayed.
             - If the user selects option 3, the total expenses for the user are displayed.
             - If the user selects option 4, the balance for the user are displayed.
+            - If the user selects option 5 - exiting to main().
             - If an invalid option is chosen, the user is prompted to select again.
 
         Exceptions:
@@ -166,20 +169,20 @@ class User:
         """
 
         try:
+            report = FinancialReport(db)
             while True:
-                user = int(input('Choose your option: '
-                                 '[1] All transactions '
-                                 '[2] Total income '
-                                 '[3] Total expenses '
-                                 '[4] Show balance'))
-                if user == 1:
-                    db.show_all_transactions(user_id)
+                user = int(input('Choose your option: [1] All transactions [2] Total income [3] Total expenses [4] Show balance [0] Exit '))
+                if user == 0:
+                    print('Exiting. ')
+                    break
+                elif user == 1:
+                    report.generate_all_transactions_report(user_id)
                 elif user == 2:
-                    db.show_total_income(user_id)
+                    report.generate_total_income_report(user_id)
                 elif user == 3:
-                    db.show_total_expenses(user_id)
+                    report.generate_total_expenses_report(user_id)
                 elif user == 4:
-                    db.show_balance(user_id)
+                    report.generate_balance_report(user_id)
                 else:
                     print('You should choose one of displayed options. ')
                     continue
