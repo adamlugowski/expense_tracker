@@ -171,8 +171,7 @@ class User:
         try:
             report = FinancialReport(db)
             while True:
-                user = int(input('Choose your option: '
-                                 '[1] All transactions [2] Total income [3] Total expenses [4] Show balance [0] Exit '))
+                user = int(input('Choose your option: [1] All transactions [2] Total income [3] Total expenses [4] Show balance [0] Exit '))
                 if user == 0:
                     print('Exiting. ')
                     break
@@ -209,7 +208,7 @@ class User:
         """
         try:
             transaction_id = int(input('Type the transaction_id to delete the transaction: '))
-            if db.check_eligible(user_id, transaction_id):
+            if db.check_if_eligible(user_id, transaction_id):
                 db.delete_transaction(transaction_id)
             else:
                 print('You are not eligible to delete this transaction. ')
