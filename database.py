@@ -7,42 +7,40 @@ load_dotenv()
 
 class Database:
     """
-    A class to manage the PostgreSQL database connection and setup for an application.
+    This module defines the `Database` class, which provides an abstraction for interacting with a PostgreSQL database.
 
-    This class utilizes environment variables to establish a database connection and
-    provides methods to initialize the database with tables for users, categories, types,
-    and transactions.
+    The `Database` class includes methods to:
+    - Establish and close database connections.
+    - Initialize the database schema and seed it with initial data.
+    - Add, retrieve, update, and delete user and transaction records.
+    - Check user permissions for transaction operations.
 
-    Attributes:
-    ----------
-    db_name : str
-        The name of the database, sourced from environment variables.
-    db_user : str
-        The database user, sourced from environment variables.
-    db_password : str
-        The password for the database user, sourced from environment variables.
-    db_host : str
-        The host address of the database, sourced from environment variables.
-    db_port : str
-        The port number of the database, sourced from environment variables.
-    connection : psycopg2.connection or None
-        The current database connection, initially set to None.
-
-    Methods:
-    -------
-    connect():
-        Establishes a connection to the PostgreSQL database using provided credentials.
-    close():
-        Closes the current database connection if it exists.
-    db_init():
-        Initializes the database tables (users, categories, types, transactions) if they do not exist.
-    add_user():
-        Inserts a new user to the 'users' table.
-    get_user():
-        Retrieves a user's data from the database based on their username.
+    Usage:
+    - Ensure the `.env` file contains the required database connection parameters (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`) before using this class.
+    - Use the `db_init` method to create necessary tables and seed initial data.
     """
-
     def __init__(self):
+        """
+        Initializes a Database instance.
+
+        This constructor sets up the database connection parameters by reading environment variables
+        defined in a `.env` file. It also initializes the `connection` attribute to `None`, which will
+        later hold the active database connection.
+
+        Attributes:
+            db_name (str): The name of the database, fetched from the 'DB_NAME' environment variable.
+            db_user (str): The username for database access, fetched from the 'DB_USER' environment variable.
+            db_password (str): The password for the database user, fetched from the 'DB_PASSWORD' environment variable.
+            db_host (str): The hostname of the database server, fetched from the 'DB_HOST' environment variable.
+            db_port (str): The port number of the database server, fetched from the 'DB_PORT' environment variable.
+            connection (psycopg2.extensions.connection or None): The database connection object, initially set to `None`.
+
+        Notes:
+            - Ensure that a `.env` file exists with the necessary environment variables before using this class.
+            - The actual database connection is not established during initialization. Use the `connect` method
+              to establish a connection.
+        """
+
         self.db_name = os.getenv('DB_NAME')
         self.db_user = os.getenv('DB_USER')
         self.db_password = os.getenv('DB_PASSWORD')
@@ -174,7 +172,7 @@ class Database:
         Add a transaction to the database.
 
         This method inserts a new transaction record into the `transactions` table with the provided details.
-        It ensures the connection to the database, executes the SQL insert query, and handles errors gracefully.
+        It ensures the connection to the database, executes the SQL insert query, and handles errors.
 
         Args:
             user_id (int): The ID of the user associated with the transaction.
@@ -212,151 +210,31 @@ class Database:
         finally:
             self.close()
 
-    def show_all_transactions(self, user_id):
+    def fetch_data(self, query, user_id):
         """
-        Retrieve and display all transactions for a specific user in a formatted, user-friendly way.
+        Executes a database query to fetch data for a specific user.
 
-        This function connects to a PostgreSQL database, queries the `transactions` table for all
-        records associated with the given `user_id`, and prints the results. Each transaction is
-        displayed with details such as transaction ID, user ID, amount, category name, description,
-        date, and type of transaction. The output is formatted for better readability.
+        This method establishes a connection to the database, executes the provided query with the given
+        user ID as a parameter, and returns the fetched results. It ensures proper resource management
+        by closing the database connection after the query is executed, regardless of success or failure.
 
         Args:
-            user_id (int): The ID of the user whose transactions are to be retrieved.
+            query (str): The SQL query to execute. It should include a parameter placeholder (e.g., %s).
+            user_id (int or str): The user ID to filter the query results.
+
+        Returns:
+            list: A list of records fetched from the database. Returns an empty list if an error occurs.
         """
         self.connect()
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute('''SELECT 
-                transactions.transaction_id, 
-                transactions.user_id, 
-                transactions.amount, 
-                categories.category_name, 
-                transactions.description, 
-                transactions.date, 
-                types.type_name
-                 FROM transactions 
-                 LEFT JOIN categories 
-                 ON transactions.category = categories.category_id
-                 LEFT JOIN types
-                 ON transactions.type = types.type_id
-                 WHERE user_id=%s;''', (user_id, ))
-                transactions = cursor.fetchall()
-                for t in transactions:
-                    transaction_details = (
-                        f"Transaction ID: {t[0]}\n"
-                        f"User ID: {t[1]}\n"
-                        f"Amount: PLN{t[2]:,.2f}\n"
-                        f"Category: {t[3]}\n"
-                        f"Description: {t[4]}\n"
-                        f"Date: {t[5].strftime('%Y-%m-%d')}\n"
-                        f"Type: {t[6]}"
-                    )
-                    print(transaction_details)
-                    print("-" * 30)
+                cursor.execute(query, (user_id, ))
+                return cursor.fetchall()
         except psycopg2.DatabaseError as error:
             print(f'Database error occurred: {error}')
+            return []
         finally:
             self.close()
-
-    def show_total_income(self, user_id):
-        """
-        Calculates and displays the total income for a specific user.
-
-        This method connects to the database, retrieves the sum of all transaction amounts
-        categorized as income (type = 1) for the specified user, and prints the total income.
-
-        Args:
-            user_id (int): The ID of the user whose total income is being calculated.
-
-        Returns:
-            float: The total income amount if the query is successful; None otherwise.
-
-        Behavior:
-            - Connects to the database.
-            - Executes a query to calculate the total income for the user.
-            - Prints the total income to the console.
-            - Ensures the database connection is closed after the operation.
-
-        Exceptions:
-            - Handles psycopg2.DatabaseError, printing an error message if a database error occurs.
-        """
-
-        self.connect()
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute('select sum(amount) from transactions where user_id = %s and type = 1;', (user_id,))
-                result = cursor.fetchone()
-                print(f'Your total income: {result[0]}')
-                return result[0]
-        except psycopg2.DatabaseError as error:
-            print(f'Database error occurred: {error}')
-        finally:
-            self.close()
-
-    def show_total_expenses(self, user_id):
-        """
-        Calculates and displays the total expenses for a specific user.
-
-        This method connects to the database, retrieves the sum of all transaction amounts
-        categorized as expenses (type = 2) for the specified user, and prints the total expenses.
-
-        Args:
-            user_id (int): The ID of the user whose total expenses are being calculated.
-
-        Returns:
-            float: The total expense amount if the query is successful; None otherwise.
-
-        Behavior:
-            - Connects to the database.
-            - Executes a query to calculate the total expenses for the user.
-            - Prints the total expenses to the console.
-            - Ensures the database connection is closed after the operation.
-
-        Exceptions:
-            - Handles psycopg2.DatabaseError, printing an error message if a database error occurs.
-        """
-
-        self.connect()
-        try:
-            with self.connection.cursor() as cursor:
-                cursor.execute('select sum(amount) from transactions where user_id = %s and type = 2;', (user_id, ))
-                result = cursor.fetchone()
-                print(f'Your total expenses: {result[0]}')
-                return result[0]
-        except psycopg2.DatabaseError as error:
-            print(f'Database error occurred: {error}')
-        finally:
-            self.close()
-
-    def show_balance(self, user_id):
-        """
-        Calculate and display the balance for a given user.
-
-        The balance is calculated as the difference between the total income and total expenses
-        of the user identified by the provided `user_id`. If any database-related error occurs,
-        it is caught and logged.
-
-        Args:
-            user_id (int): The unique identifier of the user whose balance is to be calculated.
-
-        Returns:
-            float: The calculated balance (total income - total expenses).
-
-        Raises:
-            psycopg2.DatabaseError: If an error occurs during database operations.
-
-        Side Effects:
-            Prints the calculated balance or an error message to the console.
-        """
-        try:
-            total_income = self.show_total_income(user_id)
-            total_expenses = self.show_total_expenses(user_id)
-            balance = total_income - total_expenses
-            print(f'Your balance is: {balance}')
-            return balance
-        except psycopg2.DatabaseError as error:
-            print(f'Error occurred: {error}')
 
     def delete_transaction(self, transaction_id):
         """

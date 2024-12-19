@@ -11,7 +11,7 @@ def main():
     email = input('Enter your email: ')
     user = User(username, password, email)
     # user.register(db)
-    if user.login(db):
+    if user.login(db, email):
         print("Login successful.")
         user_id = db.get_user(user.username)['user_id']
         while True:
@@ -19,11 +19,14 @@ def main():
                   '[2] Add Transaction\n'
                   '[3] Delete Transaction\n'
                   '[4] Update transaction\n'
-                  '[5] Exit')
+                  '[0] Exit')
             try:
                 choice = int(input("Choose an option: "))
 
-                if choice == 1:
+                if choice == 0:
+                    print("Goodbye!")
+                    break
+                elif choice == 1:
                     user.show_transactions(user_id, db)
                 elif choice == 2:
                     user.create_transaction(user_id, db)
@@ -31,9 +34,6 @@ def main():
                     user.delete_transaction(user_id, db)
                 elif choice == 4:
                     user.update_transaction(user_id, db)
-                elif choice == 5:
-                    print("Goodbye!")
-                    break
                 else:
                     print("Invalid option. Please try again. ")
             except ValueError as error:
