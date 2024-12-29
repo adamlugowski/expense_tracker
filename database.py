@@ -59,8 +59,8 @@ class Database:
                     password=self.db_password,
                     host=self.db_host,
                     port=self.db_port)
-        except psycopg2.DatabaseError as error:
-            print(f'A database error occurred: {error}')
+        except psycopg2.DatabaseError:
+            print(f'A database error occurred.')
 
     def close(self):
         """
@@ -102,8 +102,8 @@ class Database:
                 cursor.execute('''INSERT INTO types (type_name) VALUES 
                 ('Income'), ('Expense') ON CONFLICT DO NOTHING;''')
             self.connection.commit()
-        except psycopg2.DatabaseError as error:
-            print(f'A database error occurred: {error}')
+        except psycopg2.DatabaseError:
+            print(f'A database error occurred.')
         finally:
             self.close()
 
@@ -126,8 +126,8 @@ class Database:
                                (username, hashed_password, email))
                 self.connection.commit()
                 return True
-        except psycopg2.DatabaseError as error:
-            print(f'An error occurred while adding the user: {error}')
+        except psycopg2.DatabaseError:
+            print(f'An error occurred while adding the user.')
             return False
         finally:
             self.close()
@@ -161,8 +161,8 @@ class Database:
                     return {'user_id': user[0], 'username': user[1], 'password': user[2], 'email': user[3]}
                 else:
                     return None
-        except psycopg2.DatabaseError as error:
-            print(f'A database error has occurred while retrieving the user {username}: {error}')
+        except psycopg2.DatabaseError:
+            print(f'A database error has occurred while retrieving the user {username}.')
             return None
         finally:
             self.close()
@@ -204,8 +204,8 @@ class Database:
                 self.connection.commit()
                 print('Transaction added successfully. ')
                 return True
-        except psycopg2.DatabaseError as error:
-            print(f'Failed to add transaction to database: {error}')
+        except psycopg2.DatabaseError:
+            print(f'Failed to add transaction to database.')
             return False
         finally:
             self.close()
@@ -234,8 +234,8 @@ class Database:
             with self.connection.cursor() as cursor:
                 cursor.execute(query, params)
                 return cursor.fetchall()
-        except psycopg2.DatabaseError as error:
-            print(f'Database error occurred: {error}')
+        except psycopg2.DatabaseError:
+            print(f'Database error occurred.')
             return []
         finally:
             self.close()
@@ -257,8 +257,8 @@ class Database:
                 cursor.execute('DELETE FROM transactions WHERE transaction_id=%s;', (transaction_id, ))
                 print('Transaction deleted successfully. ')
                 self.connection.commit()
-        except psycopg2.DatabaseError as error:
-            print(f'Error during deleting the transaction: {error}')
+        except psycopg2.DatabaseError:
+            print(f'Error during deleting the transaction.')
         finally:
             self.close()
 
@@ -282,8 +282,8 @@ class Database:
                 print(f'New amount: {amount}. ')
                 print(f'Amount updated successfully in transaction {transaction_id}. ')
                 self.connection.commit()
-        except psycopg2.DatabaseError as error:
-            print(f'Error during updating the transaction: {error}')
+        except psycopg2.DatabaseError:
+            print(f'Error during updating the transaction.')
         finally:
             self.close()
 
@@ -308,8 +308,8 @@ class Database:
                 print(f'New description: {description}. ')
                 print(f'Description updated successfully in transaction {transaction_id}. ')
                 self.connection.commit()
-        except psycopg2.DatabaseError as error:
-            print(f'Error during updating the transaction: {error}')
+        except psycopg2.DatabaseError:
+            print(f'Error during updating the transaction.')
         finally:
             self.close()
 
@@ -343,7 +343,7 @@ class Database:
                     return True
                 else:
                     return False
-        except psycopg2.DatabaseError as error:
-            print(f'{error}')
+        except psycopg2.DatabaseError:
+            print(f'Error during checking the eligibility')
         finally:
             self.close()

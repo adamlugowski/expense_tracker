@@ -46,8 +46,8 @@ class FinancialReport:
         try:
             params = [user_id]
             return self.db.fetch_data(query, tuple(params))
-        except Exception as error:
-            print(f'Error fetching transactions: {error}')
+        except ConnectionError:
+            print("Database connection failed.")
             return None
 
     def generate_all_transactions_report(self, user_id):
@@ -103,8 +103,8 @@ class FinancialReport:
         try:
             params = [user_id]
             return self.db.fetch_data(query, tuple(params))
-        except Exception as error:
-            print(f'Error fetching result: {error}')
+        except ConnectionError:
+            print("Database connection failed.")
             return None
 
     def generate_total_income_report(self, user_id):
@@ -132,7 +132,7 @@ class FinancialReport:
         else:
             total_income = df['Amount'].sum()
             income_df = pd.DataFrame({'User ID': [user_id], 'Total Income': [total_income]})
-            print(f'Total income of user {user_id} is {total_income}')
+            print(f'Total income is {total_income}')
             return income_df
 
     def fetch_total_expenses_from_db(self, user_id):
@@ -158,8 +158,8 @@ class FinancialReport:
         try:
             params = [user_id]
             return self.db.fetch_data(query, tuple(params))
-        except Exception as error:
-            print(f'Error fetching result: {error}')
+        except ConnectionError:
+            print("Database connection failed.")
             return None
 
     def generate_total_expenses_report(self, user_id):
@@ -187,7 +187,7 @@ class FinancialReport:
         else:
             total_expenses = df['Amount'].sum()
             expenses_df = pd.DataFrame({'User ID': [user_id], 'Total expenses': [total_expenses]})
-            print(f'Total expenses of user {user_id} is {total_expenses}')
+            print(f'Total expenses is {total_expenses}')
             return expenses_df
 
     def calculate_total_income(self, user_id):
@@ -256,7 +256,7 @@ class FinancialReport:
             'Total expenses': [total_expenses],
             'Balance': [balance]
         })
-        print(f'Balance of user {user_id} is {balance}')
+        print(f'Balance is {balance}')
         print(balance_df)
         return balance_df
 
@@ -297,8 +297,8 @@ class FinancialReport:
         try:
             params = [user_id, start_date, end_date]
             return self.db.fetch_data(query, tuple(params))
-        except Exception as error:
-            print(f'Error fetching transactions: {error}')
+        except ConnectionError:
+            print("Database connection failed.")
             return None
 
     def generate_date_to_date_report(self, user_id, start_date, end_date):
@@ -327,7 +327,7 @@ class FinancialReport:
                 "Category", "Description", "Date", "Type"
             ]
             df = pd.DataFrame(transactions, columns=columns)
-            print(f'This is user {user_id} transactions. ')
+            print(f'This is users transactions from {start_date} to {end_date}')
             print(df)
             return df
         else:
