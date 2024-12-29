@@ -55,8 +55,8 @@ class User:
         try:
             validated_email = validate_email(self.email).normalized
             return validated_email
-        except EmailNotValidError as error:
-            print(f'Invalid email: {error}')
+        except EmailNotValidError:
+            print(f'Invalid email.')
             return None
 
     def register(self, db):
@@ -74,8 +74,10 @@ class User:
         if valid_email is None:
             return False
 
-        data = db.add_user(self.username, hashed_password, valid_email)
-        return data
+        if db.add_user(self.username, hashed_password, valid_email):
+            return True
+        else:
+            return False
 
     def login(self, db, email):
         """
@@ -104,8 +106,8 @@ class User:
             else:
                 print("Invalid password. ")
                 return False
-        except Exception as error:
-            print(f"Error accessing the database: {error}")
+        except ConnectionError:
+            print(f"Error accessing the database.")
             return False
 
     def create_transaction(self, user_id, db):
@@ -203,8 +205,8 @@ class User:
                 else:
                     print('You should choose one of displayed options. ')
                     continue
-        except ValueError as error:
-            print(f'You should type an integer: {error} ')
+        except ValueError:
+            print(f'You should type an integer.')
 
     def delete_transaction(self, user_id, db):
         """
